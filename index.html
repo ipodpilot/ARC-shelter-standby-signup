@@ -190,7 +190,7 @@
             if (!firstName || !lastName || !email || !phone || !backup || !role) return alert("Please fill all required fields.");
             if (selectedWeeks.size === 0) return alert("Please select at least one week.");
 
-            const endpoint = "https://script.google.com/macros/s/AKfycbxwXY5CNwxluadcEM_SrGoFoFDtvuhhNC4nXxf1Sn-Y5xcl9jrasDkQUhRuJeMmyCeH4Q/exec";
+            const endpoint = "https://script.google.com/macros/s/AKfycbx5QKtOyYx_nt95IUerslUe2RNvNLRID6q7OD8wMdsK70bhrupWIxWWqQfbpmUqhcD0Zw/exec";
 
             selectedWeeks.forEach(week => {
                 if (signups[week].length >= maxPerWeek) return;
