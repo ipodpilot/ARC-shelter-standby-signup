@@ -116,7 +116,7 @@
             const today = new Date();
             for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 7)) {
                 const id = d.toISOString().split('T')[0];
-                if (d < today) continue;
+                if (d < new Date("2025-06-02")) continue;
 
                 const monthKey = new Date(d.getFullYear(), d.getMonth(), 1).toLocaleString('default', { month: 'long', year: 'numeric' });
                 if (!months[monthKey]) {
