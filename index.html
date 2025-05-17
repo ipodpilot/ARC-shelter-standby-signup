@@ -198,6 +198,7 @@
                 const entry = { firstName, lastName, email, phone, backup, role, interest, week };
                 fetch(endpoint, {
                     method: "POST",
+                    mode: "cors",
                     body: JSON.stringify(entry),
                     headers: { "Content-Type": "application/json" }
                 })
