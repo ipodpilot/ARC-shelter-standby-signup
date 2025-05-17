@@ -190,7 +190,8 @@
             if (!firstName || !lastName || !email || !phone || !backup || !role) return alert("Please fill all required fields.");
             if (selectedWeeks.size === 0) return alert("Please select at least one week.");
 
-            const endpoint = "https://your-replit-or-serverless-proxy-url-here.com/";
+            const endpoint = "const endpoint = "https://shelterformsubmit.netlify.app/.netlify/functions/submit-signup";
+";
 
             selectedWeeks.forEach(week => {
                 if (signups[week].length >= maxPerWeek) return;
