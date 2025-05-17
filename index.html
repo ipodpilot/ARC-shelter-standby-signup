@@ -113,15 +113,10 @@
 
         function renderWeekButtons() {
             const months = {};
-            const today = new Date();
             for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 7)) {
                 const id = d.toISOString().split('T')[0];
-                if (d < new Date("2025-06-02")) continue;
-
                 const monthKey = new Date(d.getFullYear(), d.getMonth(), 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-                if (!months[monthKey]) {
-                    months[monthKey] = [];
-                }
+                if (!months[monthKey]) months[monthKey] = [];
 
                 signups[id] = [];
                 const label = formatButtonDate(new Date(d));
@@ -156,20 +151,14 @@
             const slotsLeft = maxPerWeek - signups[id].length;
             const names = signups[id].map(s => `${s.firstName} ${s.lastName.charAt(0)}.`).join("\n");
             button.textContent = `${label}\n${slotsLeft} slots left\n${names}`;
-            if (slotsLeft <= 0) {
-                button.classList.add("disabled");
-            } else {
-                button.classList.remove("disabled");
-            }
+            if (slotsLeft <= 0) button.classList.add("disabled");
+            else button.classList.remove("disabled");
             button.classList.toggle("selected", selectedWeeks.has(id));
         }
 
         function toggleWeek(weekId, button) {
-            if (selectedWeeks.has(weekId)) {
-                selectedWeeks.delete(weekId);
-            } else {
-                selectedWeeks.add(weekId);
-            }
+            if (selectedWeeks.has(weekId)) selectedWeeks.delete(weekId);
+            else selectedWeeks.add(weekId);
             button.classList.toggle("selected");
         }
 
@@ -190,8 +179,7 @@
             if (!firstName || !lastName || !email || !phone || !backup || !role) return alert("Please fill all required fields.");
             if (selectedWeeks.size === 0) return alert("Please select at least one week.");
 
-            const endpoint = "const endpoint = "https://shelterformsubmit.netlify.app/.netlify/functions/submit-signup";
-";
+            const endpoint = "https://shelterformsubmit.netlify.app/.netlify/functions/submit-signup";
 
             selectedWeeks.forEach(week => {
                 if (signups[week].length >= maxPerWeek) return;
