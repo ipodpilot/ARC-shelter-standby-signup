@@ -190,7 +190,7 @@
             if (!firstName || !lastName || !email || !phone || !backup || !role) return alert("Please fill all required fields.");
             if (selectedWeeks.size === 0) return alert("Please select at least one week.");
 
-            const endpoint = "https://script.google.com/macros/s/AKfycbyWSTM7rPDZgquHDP9ims_tv3iMjS8z_vnEVvKvL1VpI95m_QPfK5vndc28gds7DmTgJQ/exec";
+            const endpoint = "https://your-replit-or-serverless-proxy-url-here.com/";
 
             selectedWeeks.forEach(week => {
                 if (signups[week].length >= maxPerWeek) return;
