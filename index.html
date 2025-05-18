@@ -113,7 +113,7 @@
 
     async function loadCSV() {
       try {
-        const res = await fetch("https://raw.githubusercontent.com/ipodpilot/ARC-shelter-standby-signup/main/signups.csv?" + new Date().getTime());
+        const res = await fetch("https://raw.githubusercontent.com/ipodpilot/ARC-shelter-standby-signup/main/signups.csv");
         const csv = await res.text();
         const rows = csv.trim().split("\n").slice(1);
         rows.forEach(row => {
@@ -221,9 +221,8 @@
       .then(res => res.text())
       .then(response => {
         if (response === "Success") {
-          alert("Signed up!");
-          clearForm();
-          location.reload();
+          const query = Array.from(selectedWeeks).map(w => `weeks=${encodeURIComponent(w)}`).join('&');
+window.location.href = `thank-you.html?${query}`;
         } else {
           alert("Error: " + response);
         }
