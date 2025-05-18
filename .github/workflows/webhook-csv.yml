@@ -1,0 +1,34 @@
+name: Append Signup to CSV
+
+on:
+  repository_dispatch:
+    types: [add-signup]
+
+permissions:
+  contents: write  # critical for git push to work
+
+jobs:
+  append-to-csv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Append to CSV
+        run: |
+          echo "${{ github.event.client_payload.csv_line }}" >> signups.csv
+
+      - name: Setup Git for Commit
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and push changes
+        run: |
+          git add signups.csv
+          git commit -m "Add signup via Netlify" || echo "Nothing to commit"
+          echo "--- DEBUG: trying git push"
+          git remote -v
+          git status
+          git branch
+          git push origin HEAD:${{ github.ref_name }}
