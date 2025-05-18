@@ -17,7 +17,7 @@ exports.handler = async (event) => {
     ]
     .map(v => `"${(v || "").replace(/"/g, '""')}"`)
     .join(",");
-
+console.log("Dispatching with CSV line:", csvLine);
     const response = await fetch("https://api.github.com/repos/ipodpilot/ARC-shelter-standby-signup/dispatches", {
       method: "POST",
       headers: {
