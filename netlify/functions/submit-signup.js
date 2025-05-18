@@ -35,15 +35,11 @@ exports.handler = async (event) => {
 
     const resultText = await dispatchResponse.text();
 
-    return {
-      statusCode: dispatchResponse.status,
-      body: JSON.stringify({
-        sentPayload: payload,
-        status: dispatchResponse.status,
-        dispatchSuccess: dispatchResponse.ok,
-        githubResponse: resultText
-      })
-    };
+return {
+  statusCode: 200,
+  body: "Success"
+};
+
   } catch (err) {
     return {
       statusCode: 500,
