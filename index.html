@@ -113,7 +113,7 @@
 
     async function loadCSV() {
       try {
-        const res = await fetch("https://raw.githubusercontent.com/ipodpilot/ARC-shelter-standby-signup/main/signups.csv");
+        const res = await fetch("https://raw.githubusercontent.com/ipodpilot/ARC-shelter-standby-signup/main/signups.csv?" + new Date().getTime());
         const csv = await res.text();
         const rows = csv.trim().split("\n").slice(1);
         rows.forEach(row => {
