@@ -7,20 +7,20 @@ on:
 jobs:
   append-to-csv:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # ✅ REQUIRED for push to work
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Append CSV line to file
+      - name: Append CSV line
         run: |
           echo "${{ github.event.client_payload.csv_line }}" >> signups.csv
 
-      - name: Commit and push changes
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit and push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add signups.csv
-          git commit -m "Add signup via Netlify" || echo "No changes to commit"
-          git push https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }} HEAD:${{ github.ref_name }}
+          git commit -m "Append signup via Netlify" || echo "Nothing to commit"
+          git push
