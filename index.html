@@ -1,244 +1,255 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8" />
-    <title>Shelter Team Standby Sign-Up</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            font-size: 1.2em;
-            padding: 2em;
-            max-width: 900px;
-            margin: auto;
-        }
-        label, input, select, button {
-            display: block;
-            margin-top: 1em;
-            width: 100%;
-            font-size: 1.1em;
-        }
-        .week-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2em;
-            margin-top: 1em;
-        }
-        .month-column {
-            flex: 1 1 200px;
-        }
-        .month-column h3 {
-            text-align: center;
-            margin-bottom: 0.5em;
-        }
-        .week-buttons button {
-            padding: 0.5em;
-            font-size: 1em;
-            width: 100%;
-            margin-bottom: 0.5em;
-            white-space: pre-line;
-            text-align: center;
-        }
-        .selected {
-            background-color: #4caf50;
-            color: white;
-        }
-        .disabled {
-            background-color: #ccc;
-            color: #666;
-            pointer-events: none;
-        }
-        .hidden {
-            display: none;
-        }
-        .signup-entry {
-            border-bottom: 1px solid #ccc;
-            padding: 0.5em 0;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Shelter Team Standby Sign-Up</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      font-size: 1.2em;
+      padding: 2em;
+      max-width: 900px;
+      margin: auto;
+    }
+    label, input, select, button {
+      display: block;
+      margin-top: 1em;
+      width: 100%;
+      font-size: 1.1em;
+    }
+    .week-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2em;
+      margin-top: 1em;
+    }
+    .month-column {
+      flex: 1 1 200px;
+    }
+    .month-column h3 {
+      text-align: center;
+      margin-bottom: 0.5em;
+    }
+    .week-buttons button {
+      padding: 0.5em;
+      font-size: 1em;
+      width: 100%;
+      margin-bottom: 0.5em;
+      white-space: pre-line;
+      text-align: center;
+    }
+    .selected {
+      background-color: #4caf50;
+      color: white;
+    }
+    .disabled {
+      background-color: #ccc;
+      color: #666;
+      pointer-events: none;
+    }
+    .hidden {
+      display: none;
+    }
+    .signup-entry {
+      border-bottom: 1px solid #ccc;
+      padding: 0.5em 0;
+    }
+    .bold-name {
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <h1>Shelter Standby Sign-Up</h1>
+  <h1>Shelter Standby Sign-Up</h1>
 
-    <label>Select a Week</label>
-    <div class="week-grid" id="weekGrid"></div>
+  <label>Select a Week</label>
+  <div class="week-grid" id="weekGrid"></div>
 
-    <label for="firstName">First Name</label>
-    <input type="text" id="firstName" />
+  <label for="firstName">First Name</label>
+  <input type="text" id="firstName" />
 
-    <label for="lastName">Last Name</label>
-    <input type="text" id="lastName" />
+  <label for="lastName">Last Name</label>
+  <input type="text" id="lastName" />
 
-    <label for="email">Email</label>
-    <input type="email" id="email" />
+  <label for="email">Email</label>
+  <input type="email" id="email" />
 
-    <label for="phone">24hr Contact Number</label>
-    <input type="tel" id="phone" />
+  <label for="phone">24hr Contact Number</label>
+  <input type="tel" id="phone" />
 
-    <label for="backup">Backup Contact Number</label>
-    <input type="tel" id="backup" />
+  <label for="backup">Backup Contact Number</label>
+  <input type="tel" id="backup" />
 
-    <label for="role">Role</label>
-    <select id="role" onchange="handleRoleChange()">
-        <option value="">Select</option>
-        <option value="Supervisor">Supervisor</option>
-        <option value="Associate">Associate</option>
+  <label for="role">Role</label>
+  <select id="role" onchange="handleRoleChange()">
+    <option value="">Select</option>
+    <option value="Supervisor">Supervisor</option>
+    <option value="Associate">Associate</option>
+  </select>
+
+  <div id="associateExtra" class="hidden">
+    <label>Interested in becoming a Supervisor?</label>
+    <select id="supervisorInterest">
+      <option value="">Select</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
     </select>
+  </div>
 
-    <div id="associateExtra" class="hidden">
-        <label>Interested in becoming a Supervisor?</label>
-        <select id="supervisorInterest">
-            <option value="">Select</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-        </select>
-    </div>
+  <button onclick="signup()">Sign Up</button>
 
-    <button onclick="signup()">Sign Up</button>
+  <h2>Current Signups</h2>
+  <div id="signupList"></div>
 
-    <h2>Current Signups</h2>
-    <div id="signupList"></div>
+  <script>
+    const startDate = new Date("2025-06-02");
+    const endDate = new Date("2025-08-25");
+    const maxPerWeek = 5;
+    const signups = {};
+    const weekGrid = document.getElementById("weekGrid");
+    const signupListDiv = document.getElementById("signupList");
+    let selectedWeeks = new Set();
+    let currentUserEmail = "";
 
-    <script>
-        const startDate = new Date("2025-06-02");
-        const endDate = new Date("2025-08-25");
-        const maxPerWeek = 5;
-        const signups = {};
-        const weekGrid = document.getElementById("weekGrid");
-        const signupListDiv = document.getElementById("signupList");
-        let selectedWeeks = new Set();
+    async function loadCSV() {
+      try {
+        const res = await fetch("https://raw.githubusercontent.com/ipodpilot/ARC-shelter-standby-signup/main/signups.csv");
+        const csv = await res.text();
+        const rows = csv.trim().split("\n").slice(1);
+        rows.forEach(row => {
+          const [timestamp, firstName, lastName, email, phone, backup, role, interest, week] = row.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, ''));
+          if (!signups[week]) signups[week] = [];
+          signups[week].push({ firstName, lastName, email, role, interest });
+        });
+      } catch (e) {
+        console.error("Failed to load signups.csv:", e);
+      }
+    }
 
-        function formatButtonDate(d) {
-            return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2-digit' });
+    function renderWeekButtons() {
+      const months = {};
+      for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 7)) {
+        const id = d.toISOString().split('T')[0];
+        const monthKey = new Date(d.getFullYear(), d.getMonth(), 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+        if (!months[monthKey]) months[monthKey] = [];
+
+        if (!signups[id]) signups[id] = [];
+        const label = d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2-digit' });
+        months[monthKey].push({ id, label });
+      }
+
+      for (const [month, weeks] of Object.entries(months)) {
+        const column = document.createElement("div");
+        column.className = "month-column";
+        const heading = document.createElement("h3");
+        heading.textContent = month;
+        column.appendChild(heading);
+
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "week-buttons";
+
+        weeks.forEach(({ id, label }) => {
+          const button = document.createElement("button");
+          button.id = `week-${id}`;
+          button.dataset.weekId = id;
+          button.onclick = () => toggleWeek(id, button);
+          updateButtonDisplay(button, id, label);
+          buttonContainer.appendChild(button);
+        });
+
+        column.appendChild(buttonContainer);
+        weekGrid.appendChild(column);
+      }
+    }
+
+    function updateButtonDisplay(button, id, label) {
+      const slotsLeft = maxPerWeek - signups[id].length;
+      const names = signups[id].map(s => {
+        const full = `${s.firstName} ${s.lastName.charAt(0)}.`;
+        return (s.email === currentUserEmail) ? `<span class='bold-name'>${full}</span>` : full;
+      }).join("<br>");
+      button.innerHTML = `${label}<br>${slotsLeft} slots left<br>${names}`;
+      if (slotsLeft <= 0) button.classList.add("disabled");
+      else button.classList.remove("disabled");
+      button.classList.toggle("selected", selectedWeeks.has(id));
+    }
+
+    function toggleWeek(weekId, button) {
+      if (selectedWeeks.has(weekId)) selectedWeeks.delete(weekId);
+      else selectedWeeks.add(weekId);
+      button.classList.toggle("selected");
+    }
+
+    function handleRoleChange() {
+      const role = document.getElementById("role").value;
+      document.getElementById("associateExtra").classList.toggle("hidden", role !== "Associate");
+    }
+
+    function signup() {
+      const firstName = document.getElementById("firstName").value.trim();
+      const lastName = document.getElementById("lastName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const backup = document.getElementById("backup").value.trim();
+      const role = document.getElementById("role").value;
+      const interest = document.getElementById("supervisorInterest").value;
+
+      if (!firstName || !lastName || !email || !phone || !backup || !role) return alert("Please fill all required fields.");
+      if (selectedWeeks.size === 0) return alert("Please select at least one week.");
+
+      const endpoint = "https://shelterformsubmit.netlify.app/.netlify/functions/submit-signup";
+
+      const entry = {
+        firstName,
+        lastName,
+        email,
+        phone,
+        backup,
+        role,
+        interest,
+        weeks: Array.from(selectedWeeks)
+      };
+
+      currentUserEmail = email;
+
+      fetch(endpoint, {
+        method: "POST",
+        mode: "cors",
+        body: JSON.stringify(entry),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(res => res.text())
+      .then(response => {
+        if (response === "Success") {
+          alert("Signed up!");
+          clearForm();
+          location.reload();
+        } else {
+          alert("Error: " + response);
         }
+      })
+      .catch(err => {
+        console.error("FETCH FAILED:", err);
+        alert("Failed to submit: " + err.message);
+      });
+    }
 
-        function renderWeekButtons() {
-            const months = {};
-            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 7)) {
-                const id = d.toISOString().split('T')[0];
-                const monthKey = new Date(d.getFullYear(), d.getMonth(), 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-                if (!months[monthKey]) months[monthKey] = [];
+    function clearForm() {
+      document.getElementById("firstName").value = "";
+      document.getElementById("lastName").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("phone").value = "";
+      document.getElementById("backup").value = "";
+      document.getElementById("role").value = "";
+      document.getElementById("supervisorInterest").value = "";
+      document.getElementById("associateExtra").classList.add("hidden");
+      selectedWeeks.clear();
+      document.querySelectorAll(".week-buttons button").forEach(btn => btn.classList.remove("selected"));
+    }
 
-                signups[id] = [];
-                const label = formatButtonDate(new Date(d));
-                months[monthKey].push({ id, label });
-            }
-
-            for (const [month, weeks] of Object.entries(months)) {
-                const column = document.createElement("div");
-                column.className = "month-column";
-                const heading = document.createElement("h3");
-                heading.textContent = month;
-                column.appendChild(heading);
-
-                const buttonContainer = document.createElement("div");
-                buttonContainer.className = "week-buttons";
-
-                weeks.forEach(({ id, label }) => {
-                    const button = document.createElement("button");
-                    button.id = `week-${id}`;
-                    button.dataset.weekId = id;
-                    button.onclick = () => toggleWeek(id, button);
-                    updateButtonDisplay(button, id, label);
-                    buttonContainer.appendChild(button);
-                });
-
-                column.appendChild(buttonContainer);
-                weekGrid.appendChild(column);
-            }
-        }
-
-        function updateButtonDisplay(button, id, label) {
-            const slotsLeft = maxPerWeek - signups[id].length;
-            const names = signups[id].map(s => `${s.firstName} ${s.lastName.charAt(0)}.`).join("\n");
-            button.textContent = `${label}\n${slotsLeft} slots left\n${names}`;
-            if (slotsLeft <= 0) button.classList.add("disabled");
-            else button.classList.remove("disabled");
-            button.classList.toggle("selected", selectedWeeks.has(id));
-        }
-
-        function toggleWeek(weekId, button) {
-            if (selectedWeeks.has(weekId)) selectedWeeks.delete(weekId);
-            else selectedWeeks.add(weekId);
-            button.classList.toggle("selected");
-        }
-
-        function handleRoleChange() {
-            const role = document.getElementById("role").value;
-            document.getElementById("associateExtra").classList.toggle("hidden", role !== "Associate");
-        }
-
-        function signup() {
-            const firstName = document.getElementById("firstName").value.trim();
-            const lastName = document.getElementById("lastName").value.trim();
-            const email = document.getElementById("email").value.trim();
-            const phone = document.getElementById("phone").value.trim();
-            const backup = document.getElementById("backup").value.trim();
-            const role = document.getElementById("role").value;
-            const interest = document.getElementById("supervisorInterest").value;
-
-            if (!firstName || !lastName || !email || !phone || !backup || !role) return alert("Please fill all required fields.");
-            if (selectedWeeks.size === 0) return alert("Please select at least one week.");
-
-            const endpoint = "https://shelterformsubmit.netlify.app/.netlify/functions/submit-signup";
-
-            const entry = {
-                firstName,
-                lastName,
-                email,
-                phone,
-                backup,
-                role,
-                interest,
-                weeks: Array.from(selectedWeeks)
-            };
-
-            fetch(endpoint, {
-                method: "POST",
-                mode: "cors",
-                body: JSON.stringify(entry),
-                headers: { "Content-Type": "application/json" }
-            })
-            .then(res => res.text())
-            .then(response => {
-                if (response === "Success") {
-                    alert("Signed up!");
-                    clearForm();
-                } else {
-                    alert("Error: " + response);
-                }
-            })
-            .catch(err => {
-                console.error("FETCH FAILED:", err);
-                alert("Failed to submit: " + err.message);
-            });
-        }
-
-        function renderSignups() {
-            signupListDiv.innerHTML = "";
-            selectedWeeks.forEach(week => {
-                signups[week].forEach(s => {
-                    const div = document.createElement("div");
-                    div.className = "signup-entry";
-                    div.textContent = `${s.firstName} ${s.lastName} (${s.role}${s.role === "Associate" ? ", Wants Supervisor: " + s.interest : ""})`;
-                    signupListDiv.appendChild(div);
-                });
-            });
-        }
-
-        function clearForm() {
-            document.getElementById("firstName").value = "";
-            document.getElementById("lastName").value = "";
-            document.getElementById("email").value = "";
-            document.getElementById("phone").value = "";
-            document.getElementById("backup").value = "";
-            document.getElementById("role").value = "";
-            document.getElementById("supervisorInterest").value = "";
-            document.getElementById("associateExtra").classList.add("hidden");
-            selectedWeeks.clear();
-            document.querySelectorAll(".week-buttons button").forEach(btn => btn.classList.remove("selected"));
-        }
-
-        renderWeekButtons();
-    </script>
+    loadCSV().then(() => {
+      renderWeekButtons();
+    });
+  </script>
 </body>
 </html>
