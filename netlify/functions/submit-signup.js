@@ -3,47 +3,47 @@ const fetch = require("node-fetch");
 exports.handler = async (event) => {
   try {
     const data = JSON.parse(event.body);
+    const weeks = data.weeks || [];
 
-    const csvLine = [
-      new Date().toISOString(),
-      data.firstName,
-      data.lastName,
-      data.email,
-      data.phone,
-      data.backup,
-      data.role,
-      data.role === "Associate" ? data.interest : "",
-      data.week
-    ]
-    .map(v => `"${(v || "").replace(/"/g, '""')}"`)
-    .join(",");
+    const lines = weeks.map(week => {
+      return [
+        new Date().toISOString(),
+        data.firstName,
+        data.lastName,
+        data.email,
+        data.phone,
+        data.backup,
+        data.role,
+        data.role === "Associate" ? data.interest : "",
+        week
+      ]
+      .map(v => `"${(v || "").replace(/"/g, '""')}"`)
+      .join(",");
+    });
 
-    const payload = {
-      event_type: "add-signup",
-      client_payload: { csv_line: csvLine }
-    };
+    const fullCsvBlock = lines.join("\\n");
 
-    const dispatchResponse = await fetch("https://api.github.com/repos/ipodpilot/ARC-shelter-standby-signup/dispatches", {
+    const response = await fetch("https://api.github.com/repos/ipodpilot/ARC-shelter-standby-signup/dispatches", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
         "Content-Type": "application/json",
         "Accept": "application/vnd.github.v3+json"
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        event_type: "add-signup",
+        client_payload: { csv_line: fullCsvBlock }
+      })
     });
 
-    const resultText = await dispatchResponse.text();
-
-return {
-  statusCode: 200,
-  body: "Success"
-};
-
+    return {
+      statusCode: 200,
+      body: "Success"
+    };
   } catch (err) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: err.message, stack: err.stack })
+      body: "Function error: " + err.message
     };
   }
 };
