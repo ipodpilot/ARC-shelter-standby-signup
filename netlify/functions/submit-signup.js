@@ -18,6 +18,11 @@ exports.handler = async (event) => {
     .map(v => `"${(v || "").replace(/"/g, '""')}"`)
     .join(",");
 
+    const payload = {
+      event_type: "add-signup",
+      client_payload: { csv_line: csvLine }
+    };
+
     const dispatchResponse = await fetch("https://api.github.com/repos/ipodpilot/ARC-shelter-standby-signup/dispatches", {
       method: "POST",
       headers: {
@@ -25,12 +30,7 @@ exports.handler = async (event) => {
         "Content-Type": "application/json",
         "Accept": "application/vnd.github.v3+json"
       },
-      body: JSON.stringify({
-        event_type: "add-signup",
-        client_payload: {
-          csv_line: csvLine
-        }
-      })
+      body: JSON.stringify(payload)
     });
 
     const resultText = await dispatchResponse.text();
@@ -38,16 +38,16 @@ exports.handler = async (event) => {
     return {
       statusCode: dispatchResponse.status,
       body: JSON.stringify({
+        sentPayload: payload,
         status: dispatchResponse.status,
         dispatchSuccess: dispatchResponse.ok,
-        csvLine: csvLine,
         githubResponse: resultText
       })
     };
   } catch (err) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: err.message })
+      body: JSON.stringify({ error: err.message, stack: err.stack })
     };
   }
 };
