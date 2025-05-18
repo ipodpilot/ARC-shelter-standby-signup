@@ -2,7 +2,8 @@ name: Append Signup to CSV
 
 on:
   repository_dispatch:
-    types: [add-signup]
+    types: [add-signup]  # This must match your Netlify function
+
 
 jobs:
   update-csv:
