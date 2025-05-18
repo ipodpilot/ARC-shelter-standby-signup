@@ -5,6 +5,10 @@ exports.handler = async (event) => {
     const data = JSON.parse(event.body);
     const weeks = data.weeks || [];
 
+    if (!Array.isArray(weeks) || weeks.length === 0) {
+      return { statusCode: 400, body: "No weeks selected." };
+    }
+
     const lines = weeks.map(week => {
       return [
         new Date().toISOString(),
@@ -21,7 +25,7 @@ exports.handler = async (event) => {
       .join(",");
     });
 
-    const fullCsvBlock = lines.join("\\n");
+    const csvBlock = lines.join("\n");
 
     const response = await fetch("https://api.github.com/repos/ipodpilot/ARC-shelter-standby-signup/dispatches", {
       method: "POST",
@@ -32,14 +36,17 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         event_type: "add-signup",
-        client_payload: { csv_line: fullCsvBlock }
+        client_payload: { csv_line: csvBlock }
       })
     });
 
+    const resultText = await response.text();
+
     return {
-      statusCode: 200,
-      body: "Success"
+      statusCode: response.ok ? 200 : 500,
+      body: response.ok ? "Success" : resultText
     };
+
   } catch (err) {
     return {
       statusCode: 500,
