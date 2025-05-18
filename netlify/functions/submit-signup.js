@@ -17,8 +17,8 @@ exports.handler = async (event) => {
     ]
     .map(v => `"${(v || "").replace(/"/g, '""')}"`)
     .join(",");
-console.log("Dispatching with CSV line:", csvLine);
-    const response = await fetch("https://api.github.com/repos/ipodpilot/ARC-shelter-standby-signup/dispatches", {
+
+    const dispatchResponse = await fetch("https://api.github.com/repos/ipodpilot/ARC-shelter-standby-signup/dispatches", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
@@ -27,19 +27,27 @@ console.log("Dispatching with CSV line:", csvLine);
       },
       body: JSON.stringify({
         event_type: "add-signup",
-        client_payload: { csv_line: csvLine }
+        client_payload: {
+          csv_line: csvLine
+        }
       })
     });
 
+    const resultText = await dispatchResponse.text();
+
     return {
-      statusCode: response.ok ? 200 : 500,
-      body: response.ok ? "Success" : "GitHub dispatch failed"
+      statusCode: dispatchResponse.status,
+      body: JSON.stringify({
+        status: dispatchResponse.status,
+        dispatchSuccess: dispatchResponse.ok,
+        csvLine: csvLine,
+        githubResponse: resultText
+      })
     };
   } catch (err) {
-    console.error("Function error:", err);
     return {
       statusCode: 500,
-      body: "Function error: " + err.message
+      body: JSON.stringify({ error: err.message })
     };
   }
 };
